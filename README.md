@@ -63,18 +63,15 @@ go get github.com/neosmart/securestore-go
 // sman, err := securestore.LoadWithPassword("secure/secrets.json", "sUperDuPERsecret")
 sman, err := securestore.LoadWithKeyFile("secure/secrets.json", "secure/secrets.key")
 if err != nil {
-    log.Fatalf("Failed to open SecureStore vault: %v", err)
+    log.Fatalf("Failed to load SecureStore vault: %v", err)
 }
 
 // Retrieve and decrypt a specific secret
 val, err := sman.Get("aws:s3:accessKey")
-if err == securestore.ErrSecretNotFound {
-    fmt.Println("Secret not found in the vault.")
-} else if err != nil {
-    log.Fatalf("Decryption error: %v", err)
-} else {
-    fmt.Printf("Decrypted secret: %s\n", val)
+if err != nil {
+    log.Fatalf("Error retrieving s3 access key: %v", err)
 }
+fmt.Printf("Decrypted secret: %s\n", val)
 
 // List all available keys in the vault
 allKeys := sman.Keys()
