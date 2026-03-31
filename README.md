@@ -1,3 +1,5 @@
+[![Go Reference](https://pkg.go.dev/badge/github.com/neosmart/securestore-go.svg)](https://pkg.go.dev/github.com/neosmart/securestore-go) [![Go project version](https://badge.fury.io/go/github.com%2Fneosmart%2Fsecurestore-go.svg)](https://pkg.go.dev/github.com/neosmart/securestore-go)
+
 # SecureStore Go library
 
 This repository/package houses a Go implementation of the cross-platform, language-agnostic [SecureStore secrets specification](https://neosmart.net/SecureStore). In particular, this library may be used for interacting with [SecureStore](https://github.com/neosmart/securestore-rs) secrets containers, providing an easy-to-use and idiomatic interface for loading SecureStore containers and decrypting/retrieving secrets from within your existing PHP code.
