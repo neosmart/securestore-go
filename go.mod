@@ -1,4 +1,4 @@
-module github.com/neosmart/securestore-ext/go
+module github.com/neosmart/securestore-go
 
 go 1.16.0
 
