@@ -93,23 +93,23 @@ These functions load a vault file from disk, initialize the manager, and verify 
 
 | Function | Description |
 |:---|:---|
-| **`LoadSecrets(path, keySource)`** | The base constructor. Loads a vault using a pre-configured `KeySource` (see below). |
-| **`LoadSecretsWithPassword(path, password)`** | Shortcut to load a vault using a plaintext password string. |
-| **`LoadSecretsWithKeyFile(path, keyPath)`** | Shortcut to load a vault using a key file located on disk. |
-| **`LoadSecretsWithKey(path, key)`** | Shortcut to load a vault using a raw or PEM-encoded byte slice. |
+| **`Load(path, keySource)`** | Loads a vault using a pre-configured `KeySource` (see below). |
+| **`LoadWithPassword(path, password)`** | Convenience method to load a vault using a plaintext password string. |
+| **`LoadWithKeyFile(path, keyPath)`** | Convenience method to load a vault using a key file located on disk. |
+| **`LoadWithKey(path, key)`** | Convenience method to load a vault using an already loaded key (as a byte slice). |
 
 #### Methods
-Once initialized, use these methods to access the data:
+Once initialized, use these methods to interact with the loaded secrets:
 
 | Method | Description |
 |:---|:---|
-| **`Get(name string) (string, error)`** | Retrieves, decrypts, and authenticates a specific secret. Returns `ErrSecretNotFound` if the key is missing. |
-| **`Keys() []string`** | Returns a slice of all secret names (keys) available in the vault. |
+| **`Get(name string) (string, error)`** | Retrieves a secret by its key/name. Returns `ErrSecretNotFound` if the key is missing. |
+| **`Keys() []string`** | Returns a slice with names (keys) of all secrets in the vault. |
 
 ---
 
 ### KeySource
-The `KeySource` type abstracts the credential used to unlock a vault.
+The `KeySource` type abstracts over the type of credentials used to unlock a vault.
 
 | Method | Description |
 |:---|:---|

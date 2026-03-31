@@ -104,31 +104,31 @@ type SecretsManager struct {
 	secrets map[string]vaultEntry
 }
 
-// LoadSecretsWithPassword loads a SecureStore vault, decrypting with the provided password.
-func LoadSecretsWithPassword(path string, password string) (*SecretsManager, error) {
-	return LoadSecrets(path, NewKeySourceFromPassword(password))
+// LoadWithPassword loads a SecureStore vault, decrypting with the provided password.
+func LoadWithPassword(path string, password string) (*SecretsManager, error) {
+	return Load(path, NewKeySourceFromPassword(password))
 }
 
-// LoadSecretsWithKeyFile loads a SecureStore vault, decrypting with a key loaded from the provided path.
-func LoadSecretsWithKeyFile(path string, keyPath string) (*SecretsManager, error) {
+// LoadWithKeyFile loads a SecureStore vault, decrypting with a key loaded from the provided path.
+func LoadWithKeyFile(path string, keyPath string) (*SecretsManager, error) {
 	ks, err := NewKeySourceFromFile(keyPath)
 	if err != nil {
 		return nil, err
 	}
-	return LoadSecrets(path, ks)
+	return Load(path, ks)
 }
 
-// LoadSecretsWithKey loads a SecureStore vault, decrypting with the provided key.
-func LoadSecretsWithKey(path string, key []byte) (*SecretsManager, error) {
+// LoadWithKey loads a SecureStore vault, decrypting with the provided key.
+func LoadWithKey(path string, key []byte) (*SecretsManager, error) {
 	ks, err := NewKeySourceFromKey(key)
 	if err != nil {
 		return nil, err
 	}
-	return LoadSecrets(path, ks)
+	return Load(path, ks)
 }
 
-// LoadSecrets loads a SecureStore vault, decrypting with a key loaded from the provided KeySource.
-func LoadSecrets(path string, keySource *KeySource) (*SecretsManager, error) {
+// Load loads a SecureStore vault, decrypting with a key loaded from the provided KeySource.
+func Load(path string, keySource *KeySource) (*SecretsManager, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, fmt.Errorf("SecureStore vault not found: %w", err)
