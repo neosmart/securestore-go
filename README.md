@@ -59,29 +59,31 @@ This library contains the golang implementation of the SecureStore protocol. The
 go get github.com/neosmart/securestore-go
 ```
 
-```php
-// require_once("SecureStore.php");
-// or
-// require __DIR__ . '/vendor/autoload.php';
+```go
+// sman, err := securestore.LoadWithPassword("secure/secrets.json", "sUperDuPERsecret")
+sman, err := securestore.LoadWithKeyFile("secure/secrets.json", "secure/secrets.key")
+if err != nil {
+    log.Fatalf("Failed to open SecureStore vault: %v", err)
+}
 
-use NeoSmart\SecureStore\SecretsManager;
+// Retrieve and decrypt a specific secret
+val, err := sman.Get("aws:s3:accessKey")
+if err == securestore.ErrSecretNotFound {
+    fmt.Println("Secret not found in the vault.")
+} else if err != nil {
+    log.Fatalf("Decryption error: %v", err)
+} else {
+    fmt.Printf("Decrypted secret: %s\n", val)
+}
 
-// Load a vault using the decryption key file
-$sm = SecretsManager::loadWithKeyFile('secure/secrets.json', 'secure/secrets.key');
-
-// List all secrets
-$allKeys = $sm->keys();
-
-// Retrieve and decrypt secrets
-$accessId  = $sm->get('aws:s3:accessId');
-$accessKey = $sm->get('aws:s3:accessKey');
-
-// Continue to use them as you normally would
+// List all available keys in the vault
+allKeys := sman.Keys()
+fmt.Printf("Vault contains %d keys: %v\n", len(allKeys), allKeys)
 ```
 
-While it is **strongly recommended** to only load secrets programmatically via the encryption key, an alternative `SecretsManager::loadWithPassword("path/to/secrets.json", "your-password")` interface is also available (this can be used if you're developing an interactive tool using SecureStore, for example).
+While it is **strongly recommended** to only load secrets programmatically with the encryption key with `LoadWithKeyFile()` so as to avoid hard-coding any secrets in your code by specifying the path to the encryption key created by `ssclient` via the `--export-key` flag or top-level `ssclient export-key` command, an alternative `securestore.LoadWithPassword("path/to/secrets.json", "your-password")` interface is also available; this can be used if you're developing an interactive tool using SecureStore, for example.
 
-# API overview
+## API overview
 
 The `SecureStore` library provides a high-level interface for decrypting and accessing secrets stored in SecureStore v3 vaults.
 
