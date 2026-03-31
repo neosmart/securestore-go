@@ -70,12 +70,12 @@ func NewKeySourceFromFile(path string) (*KeySource, error) {
 		return nil, fmt.Errorf("SecureStore decryption key not found: %w", err)
 	}
 
-	return NewKeySourceFromKey(content)
+	return NewKeySourceFromBytes(content)
 }
 
-// NewKeySourceFromKey loads decryption key from a raw key.
+// NewKeySourceFromBytes loads decryption key from a raw key.
 // Handles both raw binary and ASCII-armored keys.
-func NewKeySourceFromKey(key []byte) (*KeySource, error) {
+func NewKeySourceFromBytes(key []byte) (*KeySource, error) {
 	if len(key) == masterKeyLen {
 		// Assume we were provided the raw key
 		return &KeySource{Type: TypeKey, Value: key}, nil
@@ -120,7 +120,7 @@ func LoadWithKeyFile(path string, keyPath string) (*SecretsManager, error) {
 
 // LoadWithKey loads a SecureStore vault, decrypting with the provided key.
 func LoadWithKey(path string, key []byte) (*SecretsManager, error) {
-	ks, err := NewKeySourceFromKey(key)
+	ks, err := NewKeySourceFromBytes(key)
 	if err != nil {
 		return nil, err
 	}

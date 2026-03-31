@@ -114,5 +114,5 @@ The `KeySource` type abstracts over the type of credentials used to unlock a vau
 | Method | Description |
 |:---|:---|
 | **`NewKeySourceFromPassword(password string)`** | Creates a source that derives decryption keys from a password using PBKDF2-SHA1. |
-| **`NewKeySourceFromFile(path string)`** | Loads a master key from a file. Supports raw binary or ASCII-armored (PEM) formats. |
-| **`NewKeySourceFromKey(key []byte)`** | Creates a source from an existing byte slice. Supports raw binary or ASCII-armored formats. |
+| **`NewKeySourceFromFile(path string)`** | Loads a SecureStore decryption key from the provided path. |
+| **`NewKeySourceFromBytes(key []byte)`** | Creates a source from a SecureStore encryption key loaded into a byte slice. |
