@@ -50,15 +50,15 @@ const (
 
 // KeySource is an abstraction over SecureStore password- or key-based decryption
 type KeySource struct {
-	keyType  sourceType
-	value []byte
+	keyType sourceType
+	value   []byte
 }
 
 // NewKeySourceFromPassword derives decryption keys from the provided password
 func NewKeySourceFromPassword(password string) *KeySource {
 	return &KeySource{
-		keyType:  typePassword,
-		value: []byte(password),
+		keyType: typePassword,
+		value:   []byte(password),
 	}
 }
 
