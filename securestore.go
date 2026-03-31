@@ -41,24 +41,24 @@ type vaultData struct {
 	Secrets  map[string]vaultEntry `json:"secrets"`
 }
 
-type SourceType string
+type sourceType string
 
 const (
-	TypePassword SourceType = "password"
-	TypeKey      SourceType = "key"
+	typePassword sourceType = "password"
+	typeKey      sourceType = "key"
 )
 
 // KeySource is an abstraction over SecureStore password- or key-based decryption
 type KeySource struct {
-	Type  SourceType
-	Value []byte
+	keyType  sourceType
+	value []byte
 }
 
 // NewKeySourceFromPassword derives decryption keys from the provided password
 func NewKeySourceFromPassword(password string) *KeySource {
 	return &KeySource{
-		Type:  TypePassword,
-		Value: []byte(password),
+		keyType:  typePassword,
+		value: []byte(password),
 	}
 }
 
@@ -78,7 +78,7 @@ func NewKeySourceFromFile(path string) (*KeySource, error) {
 func NewKeySourceFromBytes(key []byte) (*KeySource, error) {
 	if len(key) == masterKeyLen {
 		// Assume we were provided the raw key
-		return &KeySource{Type: TypeKey, Value: key}, nil
+		return &KeySource{keyType: typeKey, value: key}, nil
 	}
 
 	// Check for ASCII-armored (PEM-style) format
@@ -89,7 +89,7 @@ func NewKeySourceFromBytes(key []byte) (*KeySource, error) {
 			trimmed := strings.Join(strings.Fields(matches[1]), "")
 			decoded, err := base64.StdEncoding.DecodeString(trimmed)
 			if err == nil {
-				return &KeySource{Type: TypeKey, Value: decoded}, nil
+				return &KeySource{keyType: typeKey, value: decoded}, nil
 			}
 		}
 	}
@@ -241,8 +241,8 @@ func decryptEntry(entry vaultEntry, aesKey []byte, hmacKey []byte) (string, erro
 }
 
 func resolveMasterKey(source *KeySource, base64Salt string) ([]byte, error) {
-	if source.Type == TypeKey {
-		return source.Value, nil
+	if source.keyType == typeKey {
+		return source.value, nil
 	}
 
 	// Password-based derivation
@@ -255,7 +255,7 @@ func resolveMasterKey(source *KeySource, base64Salt string) ([]byte, error) {
 		return nil, fmt.Errorf("invalid salt encoding: %w", err)
 	}
 
-	return pbkdf2.Key(source.Value, salt, pbkdf2Rounds, masterKeyLen, sha1.New), nil
+	return pbkdf2.Key(source.value, salt, pbkdf2Rounds, masterKeyLen, sha1.New), nil
 }
 
 // pkcs7Unpad validates and removes PKCS#7 padding.
