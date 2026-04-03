@@ -1,4 +1,4 @@
-[![Go Reference](https://pkg.go.dev/badge/github.com/neosmart/securestore-go.svg)](https://pkg.go.dev/github.com/neosmart/securestore-go) [![Go project version](https://badge.fury.io/go/github.com%2Fneosmart%2Fsecurestore-go.svg)](https://pkg.go.dev/github.com/neosmart/securestore-go)
+[![Go Reference](https://pkg.go.dev/badge/github.com/neosmart/securestore-go.svg)](https://pkg.go.dev/github.com/neosmart/securestore-go) [![GitHub Tag](https://img.shields.io/github/v/tag/neosmart/securestore-go?label=version)](https://pkg.go.dev/github.com/neosmart/securestore-go) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/neosmart/securestore-go)
 
 # SecureStore Go library
 
