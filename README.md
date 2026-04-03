@@ -15,7 +15,7 @@ Typical SecureStore usage begins by creating a new SecureStore "vault" (an encry
 While you can compile it yourself or manually download [pre-built binaries for your platform](https://github.com/neosmart/securestore-rs/releases), you might find it easiest to just install it with `npm`:
 
 ```bash
-~> npm install --global ssclient
+~> npm install --global @neosmart/ssclient
 ```
 
 after which you can proceed with the following steps:
