@@ -1,8 +1,8 @@
-[![Go Reference](https://pkg.go.dev/badge/github.com/neosmart/securestore-go.svg)](https://pkg.go.dev/github.com/neosmart/securestore-go) [![GitHub Tag](https://img.shields.io/github/v/tag/neosmart/securestore-go?label=version)](https://pkg.go.dev/github.com/neosmart/securestore-go) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/neosmart/securestore-go)
+[![Go Reference](https://pkg.go.dev/badge/github.com/neosmart/securestore-go.svg)](https://pkg.go.dev/github.com/neosmart/securestore-go) [![GitHub Tag](https://img.shields.io/github/v/tag/neosmart/securestore-go?label=version)](https://pkg.go.dev/github.com/neosmart/securestore-go) [![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/neosmart/securestore-go)](#)
 
 # SecureStore Go library
 
-This repository/package houses a Go implementation of the cross-platform, language-agnostic [SecureStore secrets specification](https://neosmart.net/SecureStore). In particular, this library may be used for interacting with [SecureStore](https://github.com/neosmart/securestore-rs) secrets containers, providing an easy-to-use and idiomatic interface for loading SecureStore containers and decrypting/retrieving secrets from within your existing PHP code.
+This repository/package houses a Go implementation of the cross-platform, language-agnostic [SecureStore secrets specification](https://neosmart.net/SecureStore). In particular, this library may be used for interacting with [SecureStore](https://github.com/neosmart/securestore-rs) secrets containers, providing an easy-to-use and idiomatic interface for loading SecureStore containers and decrypting/retrieving secrets from within your existing go backend/frontend/application code. Implementations are available [for other languages and frameworks](https://neosmart.net/SecureStore/).
 
 ## Usage
 
@@ -62,8 +62,15 @@ go get github.com/neosmart/securestore-go
 ```
 
 ```go
-// sman, err := securestore.LoadWithPassword("secure/secrets.json", "sUperDuPERsecret")
-sman, err := securestore.LoadWithKeyFile("secure/secrets.json", "secure/secrets.key")
+// 1. Load decryption keys (or derive them from a password)
+key, err := securestore.KeyFromFile("secure/secrets.key")
+// OR: key := securestore.KeyFromPassword("sUperDuPERsecret")
+if err != nil {
+    log.Fatalf("Failed to load encryption key: %v", err)
+}
+
+// 2. Load the vault using the key
+sman, err := securestore.LoadFile("secure/secrets.json", key)
 if err != nil {
     log.Fatalf("Failed to load SecureStore vault: %v", err)
 }
@@ -80,24 +87,22 @@ allKeys := sman.Keys()
 fmt.Printf("Vault contains %d keys: %v\n", len(allKeys), allKeys)
 ```
 
-While it is **strongly recommended** to only load secrets programmatically with the encryption key with `LoadWithKeyFile()` so as to avoid hard-coding any secrets in your code by specifying the path to the encryption key created by `ssclient` via the `--export-key` flag or top-level `ssclient export-key` command, an alternative `securestore.LoadWithPassword("path/to/secrets.json", "your-password")` interface is also available; this can be used if you're developing an interactive tool using SecureStore, for example.
+While it is **strongly recommended** to only load secrets programmatically with the encryption key with `KeyFromBytes()` or `KeyFromFile()` methods so as to avoid hard-coding any secrets in your code by specifying the path to the encryption key created by `ssclient` via the `--export-key` flag or top-level `ssclient export-key` command, an alternative `securestore.KeyFromPassword()` interface is also available; this can be used if you're developing an interactive tool using SecureStore (or otherwise securely retrieve the decryption password), for example.
 
 ## API overview
 
 The `SecureStore` library provides a high-level interface for decrypting and accessing secrets stored in SecureStore v3 vaults.
 
 ### SecretsManager
-The `SecretsManager` is the primary interface for interacting with a decrypted vault.
+The `SecretsManager` is the primary interface for interacting with a SecureStore vault.
 
 #### Initialization
-These functions load a vault file from disk, initialize the manager, and verify the vault's integrity using an internal sentinel.
+These functions load a vault, initialize the manager, and verify both the vault's integrity and the correctness of the provided decryption key.
 
 | Function | Description |
 |:---|:---|
-| **`Load(path, keySource)`** | Loads a vault using a pre-configured `KeySource` (see below). |
-| **`LoadWithPassword(path, password)`** | Convenience method to load a vault using a plaintext password string. |
-| **`LoadWithKeyFile(path, keyPath)`** | Convenience method to load a vault using a key file located on disk. |
-| **`LoadWithKey(path, key)`** | Convenience method to load a vault using an already loaded key (as a byte slice). |
+| **`LoadFile(path, key)`** | Loads a SecureStore vault file from disk using a provided `Key`. |
+| **`Load(reader, key)`** | Loads a vault from any `io.Reader` (useful for embedded vaults or network payloads). |
 
 #### Methods
 Once initialized, use these methods to interact with the loaded secrets:
@@ -109,11 +114,11 @@ Once initialized, use these methods to interact with the loaded secrets:
 
 ---
 
-### KeySource
-The `KeySource` type abstracts over the type of credentials used to unlock a vault.
+### Key
+`Key` is used to specify how decryption will be performed to unlock a vault and decrypt its secrets, and are forwarded to `Load()` or `LoadFile()` methods.
 
 | Method | Description |
 |:---|:---|
-| **`NewKeySourceFromPassword(password string)`** | Creates a source that derives decryption keys from a password using PBKDF2-SHA1. |
-| **`NewKeySourceFromFile(path string)`** | Loads a SecureStore decryption key from the provided path. |
-| **`NewKeySourceFromBytes(key []byte)`** | Creates a source from a SecureStore encryption key loaded into a byte slice. |
+| **`KeyFromPassword(password)`** | Derives decryption keys from a password per the SecureStore v3 spec. |
+| **`KeyFromFile(path)`** | Loads a SecureStore decryption key from the provided path. |
+| **`KeyFromBytes(key)`** | Creates a key from a byte slice of the key contents. |
