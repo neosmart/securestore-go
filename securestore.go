@@ -49,15 +49,15 @@ const (
 	typeKey      sourceType = "key"
 )
 
-// KeySource is an abstraction over SecureStore password- or key-based decryption
-type KeySource struct {
+// Key is an abstraction over SecureStore password- or key-based decryption
+type Key struct {
 	keyType sourceType
 	value   []byte
 }
 
 // KeyFromPassword derives decryption keys from the provided password
-func KeyFromPassword(password string) *KeySource {
-	return &KeySource{
+func KeyFromPassword(password string) *Key {
+	return &Key{
 		keyType: typePassword,
 		value:   []byte(password),
 	}
@@ -65,7 +65,7 @@ func KeyFromPassword(password string) *KeySource {
 
 // KeyFromFile loads decryption key from a key file.
 // Handles both raw binary and ASCII-armored keys.
-func KeyFromFile(path string) (*KeySource, error) {
+func KeyFromFile(path string) (*Key, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("SecureStore decryption key not found: %w", err)
@@ -76,10 +76,10 @@ func KeyFromFile(path string) (*KeySource, error) {
 
 // KeyFromBytes loads decryption key from a raw key.
 // Handles both raw binary and ASCII-armored keys.
-func KeyFromBytes(key []byte) (*KeySource, error) {
+func KeyFromBytes(key []byte) (*Key, error) {
 	if len(key) == masterKeyLen {
 		// Assume we were provided the raw key
-		return &KeySource{keyType: typeKey, value: key}, nil
+		return &Key{keyType: typeKey, value: key}, nil
 	}
 
 	// Check for ASCII-armored (PEM-style) format
@@ -90,7 +90,7 @@ func KeyFromBytes(key []byte) (*KeySource, error) {
 			trimmed := strings.Join(strings.Fields(matches[1]), "")
 			decoded, err := base64.StdEncoding.DecodeString(trimmed)
 			if err == nil {
-				return &KeySource{keyType: typeKey, value: decoded}, nil
+				return &Key{keyType: typeKey, value: decoded}, nil
 			}
 		}
 	}
@@ -105,18 +105,18 @@ type SecretsManager struct {
 	secrets map[string]vaultEntry
 }
 
-// Load loads a SecureStore vault from disk, decrypting with a key loaded from the provided KeySource.
-func LoadFile(path string, keySource *KeySource) (*SecretsManager, error) {
+// Load loads a SecureStore vault from disk, decrypting with a key loaded from the provided Key.
+func LoadFile(path string, key *Key) (*SecretsManager, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, fmt.Errorf("SecureStore vault not found: %w", err)
 	}
 	defer file.Close()
-	return Load(file, keySource)
+	return Load(file, key)
 }
 
-// Load loads a SecureStore vault, decrypting with a key loaded from the provided KeySource.
-func Load(r io.Reader, keySource *KeySource) (*SecretsManager, error) {
+// Load loads a SecureStore vault, decrypting with a key loaded from the provided Key.
+func Load(r io.Reader, key *Key) (*SecretsManager, error) {
 	var data vaultData
 	if err := json.NewDecoder(r).Decode(&data); err != nil {
 		return nil, errors.New("failed to parse SecureStore vault JSON")
@@ -127,7 +127,7 @@ func Load(r io.Reader, keySource *KeySource) (*SecretsManager, error) {
 	}
 
 	// Derive or load the master key
-	masterKey, err := resolveMasterKey(keySource, data.IV)
+	masterKey, err := resolveMasterKey(key, data.IV)
 	if err != nil {
 		return nil, err
 	}
@@ -222,7 +222,7 @@ func decryptEntry(entry vaultEntry, aesKey []byte, hmacKey []byte) (string, erro
 	return string(unpadded), nil
 }
 
-func resolveMasterKey(source *KeySource, base64Salt string) ([]byte, error) {
+func resolveMasterKey(source *Key, base64Salt string) ([]byte, error) {
 	if source.keyType == typeKey {
 		return source.value, nil
 	}
