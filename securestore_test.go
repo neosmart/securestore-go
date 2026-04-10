@@ -148,7 +148,7 @@ func validateSecretKey(filename string, keyName string) error {
  */
 func TestLoadSecretsWithPassword(t *testing.T) {
 	// Attempt to load the vault with the password
-	sm, err := LoadWithPassword(vaultPath, password)
+	sm, err := LoadFile(vaultPath, KeyFromPassword(password))
 	if err != nil {
 		t.Fatalf("Failed to load vault from %s with password: %v", vaultPath, err)
 	}
@@ -163,7 +163,12 @@ func TestLoadSecretsWithPassword(t *testing.T) {
  */
 func TestLoadSecretsWithKey(t *testing.T) {
 	// Attempt to load the vault with the key file
-	sm, err := LoadWithKeyFile(vaultPath, keyFile)
+	key, err := KeyFromFile(keyFile)
+	if err != nil {
+		t.Fatalf("Failed to load key from %s: %v", keyFile, err)
+	}
+
+	sm, err := LoadFile(vaultPath, key)
 	if err != nil {
 		t.Fatalf("Failed to load vault from %s with decryption key: %v", vaultPath, err)
 	}
@@ -176,7 +181,12 @@ func TestLoadSecretsWithKey(t *testing.T) {
  */
 func TestLoadNotFound(t *testing.T) {
 	// Attempt to load the vault with the key file
-	sm, err := LoadWithKeyFile(vaultPath, keyFile)
+	key, err := KeyFromFile(keyFile)
+	if err != nil {
+		t.Fatalf("Failed to load key from %s: %v", keyFile, err)
+	}
+
+	sm, err := LoadFile(vaultPath, key)
 	if err != nil {
 		t.Fatalf("Failed to load vault from %s with decryption key: %v", vaultPath, err)
 	}
