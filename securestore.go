@@ -117,6 +117,10 @@ func LoadFile(path string, key *Key) (*SecretsManager, error) {
 
 // Load loads a SecureStore vault, decrypting with a key loaded from the provided Key.
 func Load(r io.Reader, key *Key) (*SecretsManager, error) {
+	if key == nil {
+		return nil, errors.New("missing decryption key")
+	}
+
 	var data vaultData
 	if err := json.NewDecoder(r).Decode(&data); err != nil {
 		return nil, errors.New("failed to parse SecureStore vault JSON")
